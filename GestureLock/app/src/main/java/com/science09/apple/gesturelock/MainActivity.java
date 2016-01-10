@@ -6,7 +6,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private GestureLockViewGroup mGestureLockViewGroup;
-    private GestureView mGestureView;
+    private GestureRfView mGestureView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +35,6 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                });
 
-        mGestureView = (GestureView) findViewById(R.id.id_GestureView);
+        mGestureView = (GestureRfView) findViewById(R.id.id_GestureView);
     }
 }

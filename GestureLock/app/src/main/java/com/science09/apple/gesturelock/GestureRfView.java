@@ -1,4 +1,4 @@
-package com.zte.irfss.view;
+package com.science09.apple.gesturelock;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -323,12 +323,15 @@ public class GestureRfView extends View {
                     reset();
                 }
                 p = checkSelectPoint(ex, ey);
+                Log.d(TAG, "ACTION_DOWN****8****");
                 if (p != null) {
                     checking = true;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.d(TAG, "ACTION_MOVE======");
                 if (checking) {
+                    Log.d(TAG, "ACTION_MOVE=+++++++++");
                     p = checkSelectPoint(ex, ey);
                     if (p == null) {
                         movingNoPoint = true;
@@ -339,6 +342,7 @@ public class GestureRfView extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 p = checkSelectPoint(ex, ey);
+                Log.d(TAG, "Action Up======");
                 checking = false;
                 isFinish = true;
                 break;
@@ -355,6 +359,12 @@ public class GestureRfView extends View {
             }
         }
         if (isFinish) {
+            if(!isValid((ArrayList<Point>)selectPoints)){
+                reset();
+                if(selectPoints.size()>0){
+                    selectPoints.remove(selectPoints.size()-1);
+                }
+            }
             // 判断所点击的是否符合规则
             if(selectPoints.size() == 1) {
                 if(selectPoints.get(0).index != 0 && selectPoints.get(0).index != 3){
@@ -370,8 +380,39 @@ public class GestureRfView extends View {
 //                mCompleteListener.onComplete(toPointString());
 //            }
         }
+
         this.postInvalidate();
         return true;
+    }
+
+    /**
+     * 判断所选择的触摸点是否符合规则
+     * @param mList 触摸屏所选择的点的列表
+     * @return true:满足矩阵开关的点, false:不满足要求
+     */
+    private boolean isValid(ArrayList<Point> mList) {
+        if(mList.contains(mPanelPoints[1]) || mList.contains(mPanelPoints[2])){
+            return false;
+        }
+        switch (mList.size()){
+            case 0:
+            case 1:
+                return true;
+            case 2:
+                if(mList.contains(mPanelPoints[0]) && mList.contains(mPanelPoints[3])){
+                    return false;
+                }
+                return true;
+            case 3:
+                return true;
+            case 4:
+                if(mList.contains(mPanelPoints[0]) && mList.contains(mPanelPoints[3])){
+                    return true;
+                }
+                return false;
+            default:
+                return false;
+        }
     }
 
     /**
@@ -383,16 +424,6 @@ public class GestureRfView extends View {
         }
     }
 
-//    public void markError() {
-//        markError(CLEAR_TIME);
-//    }
-//
-//    public void markError(final long time) {
-//        for (Point p : selectPoints) {
-//            p.state = Point.Mode.STATUS_FINGER_UP;
-//        }
-//        this.clearPassword(time);
-//    }
 
     public void enableTouch() {
         isTouch = true;

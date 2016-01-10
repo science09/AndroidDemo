@@ -71,12 +71,12 @@ public class GestureView extends View {
         boolean inErrorState = false;
         for(int i = 0; i<mPanelPoints.length; i++) {
             Point p = mPanelPoints[i];
-            if(p.state == Point.STATE_CHECK) {
+            if(p.state == Point.Mode.STATUS_FINGER_ON) {
                 selectedPaint.setColor((outterSelectedColor));
                 canvas.drawCircle(p.x, p.y, dotRadius, selectedPaint);
                 selectedPaint.setColor(selectedColor);
                 canvas.drawCircle(p.x, p.y, dotRadius/4, selectedPaint);
-            }else if(p.state == Point.STATE_CHECK_ERROR){
+            }else if(p.state == Point.Mode.STATUS_FINGER_UP){
                 inErrorState = true;
                 errorPaint.setColor(outterErrorColor);
                 canvas.drawCircle(p.x, p.y, dotRadius, errorPaint);
@@ -290,7 +290,7 @@ public class GestureView extends View {
      */
     private void reset() {
         for (Point p : sPoints) {
-            p.state = Point.STATE_NORMAL;
+            p.state = Point.Mode.STATUS_NO_FINGER;
         }
         sPoints.clear();
         this.enableTouch();
@@ -417,7 +417,7 @@ public class GestureView extends View {
 
                 redraw = true;
             } else if (rk == 0) {
-                p.state = Point.STATE_CHECK;
+                p.state = Point.Mode.STATUS_FINGER_ON;
                 addPoint(p);
                 redraw = true;
             }
@@ -449,7 +449,7 @@ public class GestureView extends View {
      */
     private void error() {
         for (Point p : sPoints) {
-            p.state = Point.STATE_CHECK_ERROR;
+            p.state = Point.Mode.STATUS_FINGER_UP;
         }
     }
 
@@ -459,7 +459,7 @@ public class GestureView extends View {
 
     public void markError(final long time) {
         for (Point p : sPoints) {
-            p.state = Point.STATE_CHECK_ERROR;
+            p.state = Point.Mode.STATUS_FINGER_UP;
         }
         this.clearPassword(time);
     }

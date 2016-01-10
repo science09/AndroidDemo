@@ -16,7 +16,7 @@
         <!--android:gravity="center_vertical" >-->
     <!--</com.science09.apple.gesturelock.GestureLockViewGroup>-->
 
-    <com.science09.apple.gesturelock.GestureView
+    <com.science09.apple.gesturelock.GestureRfView
         android:id="@+id/id_GestureView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
