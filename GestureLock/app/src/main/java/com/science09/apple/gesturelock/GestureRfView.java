@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Created by mepa on 16-1-8.
@@ -27,6 +28,8 @@ public class GestureRfView extends View {
             "1", "2", "3", "4", "5", "6",
             "7", "8", "9", "10", "11", "12"};
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private enum PointId {POINT_REF, POINT_RFIN, POINT_RFOUT, POINT_TRA, POINT_1, POINT_2, POINT_3,
+                          POINT_4,POINT_5,POINT_6,POINT_7,POINT_8,POINT_9,POINT_10,POINT_11,POINT_12};
     private Point[] mPanelPoints;
     private float dotRadius = 0;
     private List<Point> selectPoints = new ArrayList<>();
@@ -51,9 +54,12 @@ public class GestureRfView extends View {
      * 四个颜色，可由用户自定义，初始化时由xml文件传入传入
      */
     private int mColorNoFingerInner = 0xEE2B48ED;
-    private int mColorNoFingerOutter = 0xDD3DF121;
-    private int mColorFingerOn = 0xFFE11D55;
+    private int mColorNoFingerOutter = 0xDDAAAAAA; //0xDD3DF121;
+    private int mColorFingerOn = 0xDD3DF121; //0xFFE11D55;
     private int mColorFingerUp = 0xFFFF0000;
+
+    private Point pointDown;
+    private Point pointUp;
 
     public GestureRfView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -147,7 +153,7 @@ public class GestureRfView extends View {
             Point tp = selectPoints.get(0);
             for (i = 1; i < selectPoints.size(); i++) {
                 Point p = selectPoints.get(i);
-                if(i != 2){
+                if(i != 2 && i!= 4){
                     drawLine(tp, p, canvas, linePaint);
                     drawArrow(canvas, arrowPaint, tp, p, dotRadius / 4, 38);
                 }
@@ -256,12 +262,13 @@ public class GestureRfView extends View {
     /**
      * 清空所有点的状态
      */
-    private void reset() {
-        for (Point p : selectPoints) {
+    public void reset() {
+        for (Point p : mPanelPoints) {
             p.state = Point.Mode.STATUS_NO_FINGER;
         }
         selectPoints.clear();
         this.enableTouch();
+        postInvalidate();
     }
 
     /**
@@ -315,14 +322,10 @@ public class GestureRfView extends View {
         float ex = event.getX();
         float ey = event.getY();
         boolean isFinish = false;
-        boolean redraw = false;
         Point p = null;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if(selectPoints.size() == 4 || selectPoints.size() > 4){
-                    reset();
-                }
-                p = checkSelectPoint(ex, ey);
+                pointDown = checkSelectPoint(ex, ey);
                 Log.d(TAG, "ACTION_DOWN****8****");
                 if (p != null) {
                     checking = true;
@@ -341,45 +344,141 @@ public class GestureRfView extends View {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                p = checkSelectPoint(ex, ey);
+                pointUp = checkSelectPoint(ex, ey);
                 Log.d(TAG, "Action Up======");
                 checking = false;
                 isFinish = true;
                 break;
         }
-        if (!isFinish && checking && p != null) {
-            int rk = crossPoint(p);
-            if (rk == 2) {
-                movingNoPoint = true;
-                moveingX = ex;
-                moveingY = ey;
-            } else if (rk == 0) {
-                p.state = Point.Mode.STATUS_FINGER_ON;
-                addPoint(p);
+        if(isFinish && (pointUp != null)){
+            if(pointDown == pointUp){
+                if(selectPoints.size() == 0) {
+                    if(pointUp.index != 1 && pointUp.index != 2){
+                        pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                        addPoint(pointUp);
+                    }
+                }else if(selectPoints.size() == 1) {
+                    if(!selectPoints.contains(pointUp)){
+                        if(selectPoints.get(0).index > 3) {
+                            if(pointUp.index == 0 || pointUp.index == 3){
+                                pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                                addPoint(pointUp);
+                            }
+                        }else if(selectPoints.get(0).index == 0) {
+                            if(pointUp.index > 3) {
+                                pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                                addPoint(pointUp);
+                            }
+                        }else if(selectPoints.get(0).index == 3) {
+                            if(pointUp.index > 3) {
+                                pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                                addPoint(pointUp);
+                            }
+                        }
+                    }
+                } else if(selectPoints.size() == 2) {
+                    if(!selectPoints.contains(pointUp)){
+                        if(pointUp.index > 3){
+                            pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                            addPoint(pointUp);
+                        } else if(pointUp.index == 3){
+                            pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                            addPoint(pointUp);
+                        }else if(pointUp.index == 0){
+                            pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                            addPoint(pointUp);
+                        }
+                    }
+                } else if(selectPoints.size() == 3){
+                    if(selectPoints.contains(pointUp)){
+                        pointDown = selectPoints.get(2);
+                        reset();
+                        pointDown.state = Point.Mode.STATUS_FINGER_UP;
+                        pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                        selectPoints.add(pointUp);
+                        selectPoints.add(pointDown);
+                    } else {
+                        if(selectPoints.get(2).index > 3) {
+                            if(pointUp.index == 0 || pointUp.index == 3){
+                                pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                                addPoint(pointUp);
+                            }
+                        }else if(selectPoints.get(2).index == 0 || selectPoints.get(2).index == 3){
+                            if(pointUp.index > 3) {
+                                pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                                addPoint(pointUp);
+                            }
+                        }
+                    }
+                } else if(selectPoints.size() == 4){
+                    if(!selectPoints.contains(pointUp) && pointUp.index>3){
+                        pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                        addPoint(pointUp);
+                    }
+                } else if(selectPoints.size() == 5){
+                    int id = selectPoints.indexOf(pointUp);
+                    if(id > 0 && id < 2){
+                        //清掉前面两个点
+                        selectPoints.get(0).state = Point.Mode.STATUS_NO_FINGER;
+                        selectPoints.get(1).state = Point.Mode.STATUS_NO_FINGER;
+                        selectPoints.remove(0);
+                        selectPoints.remove(1);
+                        pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                        selectPoints.add(pointUp);
+                        invalidate();
+                    }else if(id>1 && id <4){
+                        //清掉后面两个点
+                        selectPoints.get(2).state = Point.Mode.STATUS_NO_FINGER;
+                        selectPoints.get(3).state = Point.Mode.STATUS_NO_FINGER;
+                        selectPoints.remove(2);
+                        selectPoints.remove(3);
+                        pointUp.state = Point.Mode.STATUS_FINGER_UP;
+                        selectPoints.add(pointUp);
+                    }
+                    Log.d(TAG, "id:===" +id);
+                    if(pointUp.index ==0) {
+
+                    }else if(pointUp.index ==3){
+
+                    }
+                }
+                Log.d(TAG, "点数"+selectPoints.size());
             }
         }
-        if (isFinish) {
-            if(!isValid((ArrayList<Point>)selectPoints)){
-                reset();
-                if(selectPoints.size()>0){
-                    selectPoints.remove(selectPoints.size()-1);
-                }
-            }
-            // 判断所点击的是否符合规则
-            if(selectPoints.size() == 1) {
-                if(selectPoints.get(0).index != 0 && selectPoints.get(0).index != 3){
-                    reset();
-                }
-            }
-//            if (selectPoints.size() < pwdMinLen || selectPoints.size() > pwdMaxLen) {
-//                // mCompleteListener.onPasswordTooMin(selectPoints.size());
-//                error();
-//                //clearPassword();
-//            } else if (mCompleteListener != null) {
-//                this.disableTouch();
-//                mCompleteListener.onComplete(toPointString());
+
+//        if (!isFinish && checking && p != null) {
+//            int rk = crossPoint(p);
+//            if (rk == 2) {
+//                movingNoPoint = true;
+//                moveingX = ex;
+//                moveingY = ey;
+//            } else if (rk == 0) {
+//                p.state = Point.Mode.STATUS_FINGER_ON;
+//                addPoint(p);
 //            }
-        }
+//        }
+//        if (isFinish) {
+//            if(!isValid((ArrayList<Point>)selectPoints)){
+//                reset();
+//                if(selectPoints.size()>0){
+//                    selectPoints.remove(selectPoints.size()-1);
+//                }
+//            }
+//            // 判断所点击的是否符合规则
+//            if(selectPoints.size() == 1) {
+//                if(selectPoints.get(0).index != 0 && selectPoints.get(0).index != 3){
+//                    reset();
+//                }
+//            }
+////            if (selectPoints.size() < pwdMinLen || selectPoints.size() > pwdMaxLen) {
+////                // mCompleteListener.onPasswordTooMin(selectPoints.size());
+////                error();
+////                //clearPassword();
+////            } else if (mCompleteListener != null) {
+////                this.disableTouch();
+////                mCompleteListener.onComplete(toPointString());
+////            }
+//        }
 
         this.postInvalidate();
         return true;
@@ -474,4 +573,19 @@ public class GestureRfView extends View {
     public interface OnCompleteListener {
         void onComplete(String password);
     }
+
+    public void JoinLine(int fromId, int toId){
+        for(Point p : mPanelPoints){
+            if(p.index == fromId){
+                p.state = Point.Mode.STATUS_FINGER_ON;
+                selectPoints.add(p);
+            }
+            if(p.index == toId){
+                p.state = Point.Mode.STATUS_FINGER_ON;
+                selectPoints.add(p);
+            }
+        }
+        invalidate();
+    }
+
 }

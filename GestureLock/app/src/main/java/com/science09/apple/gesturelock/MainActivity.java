@@ -2,11 +2,14 @@ package com.science09.apple.gesturelock;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private GestureLockViewGroup mGestureLockViewGroup;
     private GestureRfView mGestureView;
+    private Button mBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,5 +39,23 @@ public class MainActivity extends AppCompatActivity {
 //                });
 
         mGestureView = (GestureRfView) findViewById(R.id.id_GestureView);
+        mBtn = (Button) findViewById(R.id.id_btn);
+        mBtn.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.id_btn:
+                mGestureView.reset();
+                break;
+            default:
+                break;
+        }
     }
 }
