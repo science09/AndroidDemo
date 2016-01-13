@@ -422,7 +422,7 @@ public class GestureRfView extends View {
                         selectPoints.get(0).state = Point.Mode.STATUS_NO_FINGER;
                         selectPoints.get(1).state = Point.Mode.STATUS_NO_FINGER;
                         selectPoints.remove(0);
-                        selectPoints.remove(1);
+                        selectPoints.remove(0);
                         pointUp.state = Point.Mode.STATUS_FINGER_UP;
                         selectPoints.add(pointUp);
                         invalidate();
@@ -434,7 +434,7 @@ public class GestureRfView extends View {
                         selectPoints.get(2).state = Point.Mode.STATUS_NO_FINGER;
                         selectPoints.get(3).state = Point.Mode.STATUS_NO_FINGER;
                         selectPoints.remove(2);
-                        selectPoints.remove(3);
+                        selectPoints.remove(2);
                         Log.d(TAG, "ListSize:"+selectPoints.size());
                         for(Point pt : selectPoints){
                             Log.d(TAG, "selectID:" + pt.index);
