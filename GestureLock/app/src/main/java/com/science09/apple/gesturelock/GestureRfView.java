@@ -417,7 +417,7 @@ public class GestureRfView extends View {
                     }
                 } else if(selectPoints.size() == 5){
                     int id = selectPoints.indexOf(pointUp);
-                    if(id > 0 && id < 2){
+                    if(id==0 || id==1){
                         //清掉前面两个点
                         selectPoints.get(0).state = Point.Mode.STATUS_NO_FINGER;
                         selectPoints.get(1).state = Point.Mode.STATUS_NO_FINGER;
@@ -426,12 +426,19 @@ public class GestureRfView extends View {
                         pointUp.state = Point.Mode.STATUS_FINGER_UP;
                         selectPoints.add(pointUp);
                         invalidate();
-                    }else if(id>1 && id <4){
+                    }else if(id ==2 || id == 3){
                         //清掉后面两个点
+                        for(Point pt : selectPoints){
+                            Log.d(TAG, "selectID:" + pt.index);
+                        }
                         selectPoints.get(2).state = Point.Mode.STATUS_NO_FINGER;
                         selectPoints.get(3).state = Point.Mode.STATUS_NO_FINGER;
                         selectPoints.remove(2);
                         selectPoints.remove(3);
+                        Log.d(TAG, "ListSize:"+selectPoints.size());
+                        for(Point pt : selectPoints){
+                            Log.d(TAG, "selectID:" + pt.index);
+                        }
                         pointUp.state = Point.Mode.STATUS_FINGER_UP;
                         selectPoints.add(pointUp);
                     }
@@ -443,6 +450,9 @@ public class GestureRfView extends View {
                     }
                 }
                 Log.d(TAG, "点数"+selectPoints.size());
+                for(Point pt : selectPoints){
+                    Log.d(TAG, "selectID:" + pt.index);
+                }
             }
         }
 
