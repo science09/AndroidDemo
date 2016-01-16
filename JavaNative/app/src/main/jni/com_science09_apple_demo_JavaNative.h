@@ -9,6 +9,22 @@ extern "C" {
 #endif
 /*
  * Class:     com_science09_apple_demo_JavaNative
+ * Method:    getInt
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_science09_apple_demo_JavaNative_getInt
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_science09_apple_demo_JavaNative
+ * Method:    setId
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_com_science09_apple_demo_JavaNative_setId
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     com_science09_apple_demo_JavaNative
  * Method:    getStringFromNative
  * Signature: ()Ljava/lang/String;
  */

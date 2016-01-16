@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     private TextView mTextView;
+    private TextView mTextView2;
     private JavaNative mJavaNative;
 
     @Override
@@ -16,5 +17,7 @@ public class MainActivity extends AppCompatActivity {
         mTextView = (TextView) findViewById(R.id.tv);
         mJavaNative = new JavaNative();
         mTextView.setText(mJavaNative.getStringFromNative());
+        mTextView2 = (TextView) findViewById(R.id.tv2);
+        mTextView2.setText(mJavaNative.getInt()+"dd" + mJavaNative.setId(55));
     }
 }
