@@ -5,8 +5,8 @@ package com.science09.apple.gesturelock;
  */
 public class Point {
     enum Mode {STATUS_NO_FINGER, STATUS_FINGER_ON, STATUS_FINGER_UP};
-    public float x;
-    public float y;
+    private float x;
+    private float y;
     public Mode state = Mode.STATUS_NO_FINGER;
     public int index = 0;
 
@@ -20,19 +20,19 @@ public class Point {
         index = value;
     }
 
-    public int getColNum() {
-        if (index < 4) {
-            return index;
-        } else {
-            return (index - 4) % 6;
-        }
+    public float getX() {
+        return x;
     }
 
-    public int getRowNum() {
-        if (index < 4) {
-            return 0;
-        } else {
-            return (index - 4) / 6 + 1;
-        }
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
     }
 }

@@ -60,6 +60,9 @@ public class GestureRfView extends View {
     private int mColorFingerUp = 0xFFFF0000;
 
     private Point currentPoint;
+    private float currentRadius;
+    private float currentInnerRaidus;
+    private float startR = 0;
     private Point pointDown;
     private Point pointUp;
     private Point lastPoint;
@@ -80,6 +83,7 @@ public class GestureRfView extends View {
     public void onDraw(Canvas canvas) {
         if (!isCache) {
             initData();
+            startAnimation();
         }
         drawToCanvas(canvas);
     }
@@ -93,10 +97,10 @@ public class GestureRfView extends View {
                     // 绘制外圆
                     normalPaint.setStyle(Paint.Style.FILL);
                     normalPaint.setColor(mColorNoFingerOutter);
-                    canvas.drawCircle(p.getX(), p.getY(), dotRadius, normalPaint);
+                    canvas.drawCircle(p.getX(), p.getY(), currentRadius, normalPaint);
                     // 绘制内圆
                     normalPaint.setColor(mColorNoFingerInner);
-                    canvas.drawCircle(p.getX(), p.getY(), dotRadius * 3 / 4, normalPaint);
+                    canvas.drawCircle(p.getX(), p.getY(), currentInnerRaidus, normalPaint);
                     // 绘制文字
                     if (p.index < 4) {
                         mFontPaint.setTextSize(20);
@@ -105,33 +109,35 @@ public class GestureRfView extends View {
                     }
                     mFontWidth = mFontPaint.measureText(mText[p.index]) / 2;
                     canvas.drawText(mText[p.index], p.getX() - mFontWidth, p.getY() + 10, mFontPaint);
-                    if(currentPoint == null){
-                        currentPoint = mPanelPoints[0];
-                        normalPaint.setColor(mColorNoFingerOutter);
-                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius, normalPaint);
-                        normalPaint.setColor(mColorNoFingerInner);
-                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius * 3 / 4, normalPaint);
-                        if (currentPoint.index < 4) {
-                            mFontPaint.setTextSize(20);
-                        } else {
-                            mFontPaint.setTextSize(30);
-                        }
-                        mFontWidth = mFontPaint.measureText(mText[currentPoint.index]) / 2;
-                        canvas.drawText(mText[currentPoint.index], currentPoint.getX() - mFontWidth, currentPoint.getY() + 10, mFontPaint);
-                        startAnimation();
-                    } else {
-                        normalPaint.setColor(mColorNoFingerOutter);
-                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius, normalPaint);
-                        normalPaint.setColor(mColorNoFingerInner);
-                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius * 3 / 4, normalPaint);
-                        if (currentPoint.index < 4) {
-                            mFontPaint.setTextSize(20);
-                        } else {
-                            mFontPaint.setTextSize(30);
-                        }
-                        mFontWidth = mFontPaint.measureText(mText[currentPoint.index]) / 2;
-                        canvas.drawText(mText[currentPoint.index], currentPoint.getX() - mFontWidth, currentPoint.getY() + 10, mFontPaint);
-                    }
+//                    if(currentPoint == null){
+//                        currentPoint = mPanelPoints[0];
+//                        normalPaint.setStyle(Paint.Style.FILL);
+//                        normalPaint.setColor(mColorNoFingerOutter);
+//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius, normalPaint);
+//                        normalPaint.setColor(mColorNoFingerInner);
+//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius * 3 / 4, normalPaint);
+//                        if (currentPoint.index < 4) {
+//                            mFontPaint.setTextSize(20);
+//                        } else {
+//                            mFontPaint.setTextSize(30);
+//                        }
+//                        mFontWidth = mFontPaint.measureText(mText[currentPoint.index]) / 2;
+//                        canvas.drawText(mText[currentPoint.index], currentPoint.getX() - mFontWidth, currentPoint.getY() + 10, mFontPaint);
+//                        startAnimation();
+//                    } else {
+//                        normalPaint.setStyle(Paint.Style.FILL);
+//                        normalPaint.setColor(mColorNoFingerOutter);
+//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius, normalPaint);
+//                        normalPaint.setColor(mColorNoFingerInner);
+//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius * 3 / 4, normalPaint);
+//                        if (currentPoint.index < 4) {
+//                            mFontPaint.setTextSize(20);
+//                        } else {
+//                            mFontPaint.setTextSize(30);
+//                        }
+//                        mFontWidth = mFontPaint.measureText(mText[currentPoint.index]) / 2;
+//                        canvas.drawText(mText[currentPoint.index], currentPoint.getX() - mFontWidth, currentPoint.getY() + 10, mFontPaint);
+//                    }
                     break;
                 case STATUS_FINGER_ON:
                     // 绘制外圆
@@ -539,20 +545,43 @@ public class GestureRfView extends View {
         invalidate();
     }
 
+//    private void startAnimation(){
+//        Point startPoint = mPanelPoints[7];
+//        Point endPoint = mPanelPoints[0];
+//        ValueAnimator anim = ValueAnimator.ofObject(new PointEvaluator(), startPoint, endPoint);
+//        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//            @Override
+//            public void onAnimationUpdate(ValueAnimator animation) {
+//                currentPoint = (Point) animation.getAnimatedValue();
+//                Log.d(TAG, "AnimationUpdate....");
+//                postInvalidate(); //invalidate();
+//            }
+//        });
+//        anim.setDuration(1000);
+//        anim.start();
+//    }
+
     private void startAnimation(){
-        Point startPoint = mPanelPoints[7];
-        Point endPoint = mPanelPoints[0];
-        ValueAnimator anim = ValueAnimator.ofObject(new PointEvaluator(), startPoint, endPoint);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        ValueAnimator OuterAnim = ValueAnimator.ofFloat(startR, dotRadius);
+        OuterAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                currentPoint = (Point) animation.getAnimatedValue();
-                Log.d(TAG, "AnimationUpdate....");
-                postInvalidate(); //invalidate();
+                currentRadius = (float) animation.getAnimatedValue();
+                postInvalidate();
             }
         });
-        anim.setDuration(1000);
-        anim.start();
+        OuterAnim.setDuration(1000);
+        OuterAnim.start();
+        ValueAnimator InnerAnim = ValueAnimator.ofFloat(startR, dotRadius * 3 / 4);
+        InnerAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                currentInnerRaidus = (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+        InnerAnim.setDuration(1500);
+        InnerAnim.start();
     }
 
     public class SelectPointPair {
@@ -570,6 +599,17 @@ public class GestureRfView extends View {
             float y = startPoint.getY() + fraction * (endPoint.getY() - startPoint.getY());
             Point point = new Point(x, y, endPoint.index);
             return point;
+        }
+    }
+
+    public class SpreadEvaluator implements TypeEvaluator{
+
+        @Override
+        public Object evaluate(float fraction, Object startValue, Object endValue) {
+            float startRadius = (float) startValue;
+            float endRadius = (float) endValue;
+            float radius = startRadius + fraction * (endRadius - startRadius);
+            return radius;
         }
     }
 }
