@@ -24,7 +24,6 @@ public class GestureView extends View {
     private float height = 0;
     private boolean isCache = false;
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//    private Point[][] mPoints = new Point[3][3];
     private Point[] mPanelPoints;
     private float dotRadius = 0;
     private List<Point> sPoints = new ArrayList<Point>();
@@ -73,20 +72,20 @@ public class GestureView extends View {
             Point p = mPanelPoints[i];
             if(p.state == Point.Mode.STATUS_FINGER_ON) {
                 selectedPaint.setColor((outterSelectedColor));
-                canvas.drawCircle(p.x, p.y, dotRadius, selectedPaint);
+                canvas.drawCircle(p.getX(), p.getY(), dotRadius, selectedPaint);
                 selectedPaint.setColor(selectedColor);
-                canvas.drawCircle(p.x, p.y, dotRadius/4, selectedPaint);
+                canvas.drawCircle(p.getX(), p.getY(), dotRadius/4, selectedPaint);
             }else if(p.state == Point.Mode.STATUS_FINGER_UP){
                 inErrorState = true;
                 errorPaint.setColor(outterErrorColor);
-                canvas.drawCircle(p.x, p.y, dotRadius, errorPaint);
+                canvas.drawCircle(p.getX(), p.getY(), dotRadius, errorPaint);
                 errorPaint.setColor(errorColor);
-                canvas.drawCircle(p.x, p.y, dotRadius/4, errorPaint);
+                canvas.drawCircle(p.getX(), p.getY(), dotRadius/4, errorPaint);
             }else {
                 normalPaint.setColor(dotColor);
-                canvas.drawCircle(p.x, p.y, dotRadius, normalPaint);
+                canvas.drawCircle(p.getX(), p.getY(), dotRadius, normalPaint);
                 normalPaint.setColor(outterDotColor);
-                canvas.drawCircle(p.x, p.y, dotRadius/4, normalPaint);
+                canvas.drawCircle(p.getX(), p.getY(), dotRadius/4, normalPaint);
             }
         }
 
@@ -95,20 +94,20 @@ public class GestureView extends View {
 //                Point p = mPoints[i][j];
 //                if (p.state == Point.STATE_CHECK) {
 //                    selectedPaint.setColor(outterSelectedColor);
-//                    canvas.drawCircle(p.x, p.y, dotRadius, selectedPaint);
+//                    canvas.drawCircle(p.getX(), p.getY(), dotRadius, selectedPaint);
 //                    selectedPaint.setColor(selectedColor);
-//                    canvas.drawCircle(p.x, p.y, dotRadius/4, selectedPaint);
+//                    canvas.drawCircle(p.getX(), p.getY(), dotRadius/4, selectedPaint);
 //                } else if (p.state == Point.STATE_CHECK_ERROR) {
 //                    inErrorState = true;
 //                    errorPaint.setColor(outterErrorColor);
-//                    canvas.drawCircle(p.x, p.y, dotRadius, errorPaint);
+//                    canvas.drawCircle(p.getX(), p.getY(), dotRadius, errorPaint);
 //                    errorPaint.setColor(errorColor);
-//                    canvas.drawCircle(p.x, p.y, dotRadius/4, errorPaint);
+//                    canvas.drawCircle(p.getX(), p.getY(), dotRadius/4, errorPaint);
 //                } else {
 //                    normalPaint.setColor(dotColor);
-//                    canvas.drawCircle(p.x, p.y, dotRadius, normalPaint);
+//                    canvas.drawCircle(p.getX(), p.getY(), dotRadius, normalPaint);
 //                    normalPaint.setColor(outterDotColor);
-//                    canvas.drawCircle(p.x, p.y, dotRadius/4, normalPaint);
+//                    canvas.drawCircle(p.getX(), p.getY(), dotRadius/4, normalPaint);
 //                }
 //            }
 //        }
@@ -139,16 +138,16 @@ public class GestureView extends View {
     }
 
     private void drawLine(Point start, Point end, Canvas canvas, Paint paint) {
-        double d = MathUtil.distance(start.x, start.y, end.x, end.y);
-        float rx = (float) ((end.x-start.x) * dotRadius / 4 / d);
-        float ry = (float) ((end.y-start.y) * dotRadius / 4 / d);
-        canvas.drawLine(start.x+rx, start.y+ry, end.x-rx, end.y-ry, paint);
+        double d = MathUtil.distance(start.getX(), start.getY(), end.getX(), end.getY());
+        float rx = (float) ((end.getX()-start.getX()) * dotRadius / 4 / d);
+        float ry = (float) ((end.getY()-start.getY()) * dotRadius / 4 / d);
+        canvas.drawLine(start.getX()+rx, start.getY()+ry, end.getX()-rx, end.getY()-ry, paint);
     }
 
     private void drawArrow(Canvas canvas, Paint paint, Point start, Point end, float arrowHeight, int angle) {
-        double d = MathUtil.distance(start.x, start.y, end.x, end.y);
-        float sin_B = (float) ((end.x - start.x) / d);
-        float cos_B = (float) ((end.y - start.y) / d);
+        double d = MathUtil.distance(start.getX(), start.getY(), end.getX(), end.getY());
+        float sin_B = (float) ((end.getX() - start.getX()) / d);
+        float cos_B = (float) ((end.getY() - start.getY()) / d);
         float tan_A = (float) Math.tan(Math.toRadians(angle));
         float h = (float) (d - arrowHeight - dotRadius * 1.1);
         float l = arrowHeight * tan_A;
@@ -156,12 +155,12 @@ public class GestureView extends View {
         float b = l * cos_B;
         float x0 = h * sin_B;
         float y0 = h * cos_B;
-        float x1 = start.x + (h + arrowHeight) * sin_B;
-        float y1 = start.y + (h + arrowHeight) * cos_B;
-        float x2 = start.x + x0 - b;
-        float y2 = start.y + y0 + a;
-        float x3 = start.x + x0 + b;
-        float y3 = start.y + y0 - a;
+        float x1 = start.getX() + (h + arrowHeight) * sin_B;
+        float y1 = start.getY() + (h + arrowHeight) * cos_B;
+        float x2 = start.getX() + x0 - b;
+        float y2 = start.getY() + y0 + a;
+        float x3 = start.getX() + x0 + b;
+        float y3 = start.getY() + y0 - a;
         Path path = new Path();
         path.moveTo(x1, y1);
         path.lineTo(x2, y2);
@@ -200,7 +199,7 @@ public class GestureView extends View {
             else {
                 mPanelPoints[i] = new Point(mDotX+((i-4)%6)*mPointBetween, mDotY +((i-4)/6+1)*mPointYBetween, i);
             }
-            Log.d(TAG, "PointX:" +mPanelPoints[i].x + "PointY:" +mPanelPoints[i].y);
+            Log.d(TAG, "PointX:" +mPanelPoints[i].getX() + "PointY:" +mPanelPoints[i].getY());
         }
 
 //        mPoints[0][0] = new Point(x + middleX - dotPadding, y + middleY - dotPadding, 1);
@@ -270,14 +269,14 @@ public class GestureView extends View {
     private Point checkSelectPoint(float x, float y) {
         for(int i = 0; i <mPanelPoints.length; i++) {
             Point p = mPanelPoints[i];
-            if(MathUtil.checkInRound(p.x, p.y, dotRadius, (int)x, (int)y)){
+            if(MathUtil.checkInRound(p.getX(), p.getY(), dotRadius, (int)x, (int)y)){
                 return p;
             }
         }
 //        for (int i = 0; i < mPoints.length; i++) {
 //            for (int j = 0; j < mPoints[i].length; j++) {
 //                Point p = mPoints[i][j];
-//                if (MathUtil.checkInRound(p.x, p.y, dotRadius, (int) x, (int) y)) {
+//                if (MathUtil.checkInRound(p.getX(), p.getY(), dotRadius, (int) x, (int) y)) {
 //                    return p;
 //                }
 //            }
@@ -325,9 +324,9 @@ public class GestureView extends View {
     private void addPoint(Point point) {
         if (sPoints.size() > 0) {
             Point lastPoint = sPoints.get(sPoints.size() - 1);
-            Log.d(TAG, "LastPoint====Col:"+lastPoint.getColNum()+"Row"+lastPoint.getRowNum());
-            int dx = Math.abs(lastPoint.getColNum() - point.getColNum());
-            int dy = Math.abs(lastPoint.getRowNum() - point.getRowNum());
+//            Log.d(TAG, "LastPoint====Col:"+lastPoint.getColNum()+"Row"+lastPoint.getRowNum());
+//            int dx = Math.abs(lastPoint.getColNum() - point.getColNum());
+//            int dy = Math.abs(lastPoint.getRowNum() - point.getRowNum());
 //            if ((dx > 1 || dy > 1) && (dx == 0 || dy == 0 || dx == dy)) {
 //                int middleIndex = (point.index + lastPoint.index) / 2 - 1;
 //                Log.d(TAG, "middleIndex:"+middleIndex);

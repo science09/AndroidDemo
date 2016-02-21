@@ -1,16 +1,24 @@
 package com.science09.apple.gesturelock;
 
+import android.animation.AnimatorSet;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.gesture.GestureStore;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +55,7 @@ public class GestureRfView extends View {
     private Paint errorPaint;
     private Paint normalPaint;
     private Paint mFontPaint;
+    private Paint mTouchPaint;
     private int errorColor = 0xffea0945;
     private int selectedColor = 0xff0596f6;
     private int outterSelectedColor = 0xff8cbad8;
@@ -54,14 +63,15 @@ public class GestureRfView extends View {
     /**
      * 四个颜色，可由用户自定义，初始化时由xml文件传入传入
      */
-    private int mColorNoFingerInner = 0xEE2B48ED;
-    private int mColorNoFingerOutter = 0xDDAAAAAA; //0xDD3DF121;
+    private int mColorNoFingerInner = 0xee3d8ce1;
+    private int mColorNoFingerOutter =  0xdd18b78f; // 0xDDAAAAAA;
     private int mColorFingerOn = 0xDD3DF121; //0xFFE11D55;
     private int mColorFingerUp = 0xFFFF0000;
 
     private Point currentPoint;
     private float currentRadius;
     private float currentInnerRaidus;
+    private float touchRadius;
     private float startR = 0;
     private Point pointDown;
     private Point pointUp;
@@ -85,7 +95,13 @@ public class GestureRfView extends View {
             initData();
             startAnimation();
         }
+
         drawToCanvas(canvas);
+        if(pointDown != null){
+            canvas.save();
+            canvas.drawCircle(pointDown.getX(), pointDown.getY(), touchRadius, mTouchPaint);
+            canvas.restore();
+        }
     }
 
     private void drawToCanvas(Canvas canvas) {
@@ -109,35 +125,6 @@ public class GestureRfView extends View {
                     }
                     mFontWidth = mFontPaint.measureText(mText[p.index]) / 2;
                     canvas.drawText(mText[p.index], p.getX() - mFontWidth, p.getY() + 10, mFontPaint);
-//                    if(currentPoint == null){
-//                        currentPoint = mPanelPoints[0];
-//                        normalPaint.setStyle(Paint.Style.FILL);
-//                        normalPaint.setColor(mColorNoFingerOutter);
-//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius, normalPaint);
-//                        normalPaint.setColor(mColorNoFingerInner);
-//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius * 3 / 4, normalPaint);
-//                        if (currentPoint.index < 4) {
-//                            mFontPaint.setTextSize(20);
-//                        } else {
-//                            mFontPaint.setTextSize(30);
-//                        }
-//                        mFontWidth = mFontPaint.measureText(mText[currentPoint.index]) / 2;
-//                        canvas.drawText(mText[currentPoint.index], currentPoint.getX() - mFontWidth, currentPoint.getY() + 10, mFontPaint);
-//                        startAnimation();
-//                    } else {
-//                        normalPaint.setStyle(Paint.Style.FILL);
-//                        normalPaint.setColor(mColorNoFingerOutter);
-//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius, normalPaint);
-//                        normalPaint.setColor(mColorNoFingerInner);
-//                        canvas.drawCircle(currentPoint.getX(), currentPoint.getY(), dotRadius * 3 / 4, normalPaint);
-//                        if (currentPoint.index < 4) {
-//                            mFontPaint.setTextSize(20);
-//                        } else {
-//                            mFontPaint.setTextSize(30);
-//                        }
-//                        mFontWidth = mFontPaint.measureText(mText[currentPoint.index]) / 2;
-//                        canvas.drawText(mText[currentPoint.index], currentPoint.getX() - mFontWidth, currentPoint.getY() + 10, mFontPaint);
-//                    }
                     break;
                 case STATUS_FINGER_ON:
                     // 绘制外圆
@@ -158,10 +145,12 @@ public class GestureRfView extends View {
                     break;
                 case STATUS_FINGER_UP:
                     // 绘制外圆
-                    normalPaint.setStyle(Paint.Style.FILL);
+                    normalPaint.setStyle(Paint.Style.STROKE);
+                    normalPaint.setStrokeWidth(3);
                     normalPaint.setColor(mColorFingerUp);
                     canvas.drawCircle(p.getX(), p.getY(), dotRadius, normalPaint);
                     // 绘制内圆
+                    normalPaint.setStyle(Paint.Style.FILL);
                     normalPaint.setColor(mColorNoFingerOutter);
                     canvas.drawCircle(p.getX(), p.getY(), dotRadius * 3 / 4, normalPaint);
                     // 绘制文字
@@ -271,6 +260,9 @@ public class GestureRfView extends View {
         mFontPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mFontPaint.setColor(Color.WHITE);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTouchPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mTouchPaint.setColor(Color.GRAY);
+        mTouchPaint.setStrokeWidth(2);
     }
 
     /**
@@ -340,8 +332,9 @@ public class GestureRfView extends View {
             case MotionEvent.ACTION_DOWN:
                 pointDown = checkSelectPoint(ex, ey);
                 Log.d(TAG, "ACTION_DOWN****8****");
-                if (p != null) {
+                if (pointDown != null) {
                     checking = true;
+                    startTouchAnim();
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -561,6 +554,35 @@ public class GestureRfView extends View {
 //        anim.start();
 //    }
 
+    private void startTouchAnim(){
+        ValueAnimator touchAnim = ValueAnimator.ofFloat(startR+5, dotRadius);
+        touchAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                touchRadius = (float) animation.getAnimatedValue();
+                postInvalidate();
+            }
+        });
+        touchAnim.setInterpolator(new DecelerateInterpolator());
+        ObjectAnimator colorAnim = ObjectAnimator.ofObject(this, mBackgroundColorProperty, new ArgbEvaluator(), Color.LTGRAY, Color.TRANSPARENT);
+        AnimatorSet animSet = new AnimatorSet();
+        animSet.play(touchAnim).with(colorAnim);
+        animSet.setDuration(1000);
+        animSet.start();
+    }
+
+    private Property<GestureRfView, Integer> mBackgroundColorProperty = new Property<GestureRfView, Integer>(Integer.class, "bg_color") {
+        @Override
+        public Integer get(GestureRfView object) {
+            return object.mTouchPaint.getColor();
+        }
+
+        @Override
+        public void set(GestureRfView object, Integer value) {
+            object.mTouchPaint.setColor(value);
+        }
+    };
+
     private void startAnimation(){
         ValueAnimator OuterAnim = ValueAnimator.ofFloat(startR, dotRadius);
         OuterAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -570,6 +592,7 @@ public class GestureRfView extends View {
                 postInvalidate();
             }
         });
+        OuterAnim.setInterpolator(new BounceInterpolator());
         OuterAnim.setDuration(1000);
         OuterAnim.start();
         ValueAnimator InnerAnim = ValueAnimator.ofFloat(startR, dotRadius * 3 / 4);
