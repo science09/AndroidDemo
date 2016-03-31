@@ -77,4 +77,8 @@ public class MainActivity extends AppCompatActivity {
     public void gotoSafeModule(View view) {
         startActivity(new Intent(this, SafeActivity.class));
     }
+
+    public void gotoBindingModule(View view){
+        startActivity(new Intent(this, RxBindActivity.class)); 
+    }
 }

@@ -20,7 +20,7 @@ public class NetworkWrapper {
 
         Observable.from(mFamousUsers)
                 .flatMap(gitHubService::getUserData)
-                .subscribeOn(Schedulers.newThread())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(adapter::addUser);
     }

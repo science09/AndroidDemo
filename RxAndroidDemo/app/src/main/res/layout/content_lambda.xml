@@ -12,4 +12,8 @@
     tools:context="com.science09.apple.rxandroiddemo.LambdaActivity"
     tools:showIn="@layout/activity_lambda">
 
+    <TextView
+        android:id="@+id/simple_tv_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </RelativeLayout>
